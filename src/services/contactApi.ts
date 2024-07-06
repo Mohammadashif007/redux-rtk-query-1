@@ -1,34 +1,49 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { TContact } from "../modules/contacts.module";
 
-export const contactsApi = createApi({
-    reducerPath: "contactsApi",
+export const contactApi = createApi({
+    reducerPath: "contactApi",
     baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:3000/" }),
+    tagTypes: ["Contact"],
     endpoints: (builder) => ({
         contacts: builder.query<TContact[], void>({
             query: () => "/users",
+            providesTags: ["Contact"],
         }),
-        contact: builder.query<TContact, string>({
-            query: (id) => `/users/${id}`
-        })
+        contact: builder.query<TContact, number>({
+            query: (id) => `/users/${id}`,
+            providesTags: ["Contact"],
+        }),
+        addContact: builder.mutation<void, TContact>({
+            query: (contact) => ({
+                url: "/users",
+                method: "POST",
+                body: contact,
+            }),
+            invalidatesTags: ["Contact"],
+        }),
+        updateContact: builder.mutation<void, TContact>({
+            query: ({ id, ...rest }) => ({
+                url: `/users/${id}`,
+                method: "PUT",
+                body: rest,
+            }),
+            invalidatesTags: ["Contact"],
+        }),
+        deleteContact: builder.mutation<void, number>({
+            query: (id) => ({
+                url: `/users/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["Contact"],
+        }),
     }),
 });
 
-export const { useContactsQuery, useContactQuery } = contactsApi;
-
-
-// import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-// import { TContact } from "../modules/contacts.module";
-
-// const contactsApi = createApi({
-//     reducerPath: 'contactsApi', // Add a unique reducer path
-//     baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:3000/" }),
-//     endpoints: (builder) => ({
-//         contacts: builder.query<TContact[], void>({
-//             query: () => "/users",
-//         }),
-//     }),
-// });
-
-// export const { useContactsQuery } = contactsApi; // Updated the hook name to match the endpoint
-// export default contactsApi.reducer; // Export the reducer to add it to the store
+export const {
+    useContactsQuery,
+    useContactQuery,
+    useAddContactMutation,
+    useUpdateContactMutation,
+    useDeleteContactMutation,
+} = contactApi;
